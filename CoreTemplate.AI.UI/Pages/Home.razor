@@ -1,0 +1,47 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav
+
+<div class="home-hero">
+    <div class="home-card card">
+        <div class="eyebrow">Welcome</div>
+        <h1>CoreTemplate.<span class="brand-text">AI</span></h1>
+
+        <AuthorizeView>
+            <Authorized>
+                <p class="sub">You're signed in. Jump into a chat or explore the features.</p>
+                <div class="btn-row">
+                    <NavLink href="/chat" class="btn btn-primary">Open AI Chat</NavLink>
+                    <NavLink href="/auth/logout" class="btn btn-ghost">Sign Out</NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <p class="sub">Sign in to start chatting with the assistant.</p>
+                <div class="btn-row">
+                    <NavLink href="/auth/login" class="btn btn-primary">Login</NavLink>
+                    <NavLink href="/auth/register" class="btn btn-ghost">Register</NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
+        <div class="feature-strip">
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>OpenRouter</h3>
+                    <p>Access multiple frontier models behind a single API with smart routing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧱</div>
+                    <h3>Function Calling</h3>
+                    <p>Call your server-side tools with auto schema & secure dispatch.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Agents & Profiles</h3>
+                    <p>Define reusable system prompts, temperatures and behaviors.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,159 @@
+﻿@page "/chat"
+@attribute [Authorize]
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JS
+@implements IDisposable
+
+<div class="container">
+    <div class="card chat-shell">
+        <div class="chat-toolbar">
+            <div class="toolbar-title">
+                <span class="brand-badge">AI</span> <span>CoreTemplate.AI Chat</span>
+            </div>
+            <span class="badge">live</span>
+
+            <select id="agentSelect" @bind="SelectedAgentId" class="agent-select" title="Select profile">
+                @foreach (var agent in AgentProfiles)
+                {
+                    <option value="@agent.Id">@agent.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="chat-window" @ref="chatWindowRef">
+            @foreach (var message in Messages)
+            {
+                <div class="msg @(message.Role)">
+                    @if (message.Role == "assistant")
+                    {
+                        <div class="avatar">A</div>
+                    }
+                    <div class="bubble">
+                        @message.Content
+                        <div class="timestamp">@message.When.ToLocalTime().ToShortTimeString()</div>
+                    </div>
+                    @if (message.Role == "user")
+                    {
+                        <div class="avatar user">U</div>
+                    }
+                </div>
+            }
+
+            @if (IsThinking)
+            {
+                <div class="msg assistant">
+                    <div class="avatar">A</div>
+                    <div class="bubble typing">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="input-row">
+            <input class="textbox" @bind="UserMessage" @bind:event="oninput"
+                   placeholder="Type your message…" @onkeypress="HandleKeyPress" />
+            <button class="send" @onclick="SendMessage" disabled="@string.IsNullOrWhiteSpace(UserMessage)">Send</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string UserMessage = "";
+    private bool IsThinking = false;
+    private List<ChatMessage> Messages = new();
+    private ElementReference chatWindowRef;
+
+    private string SelectedAgentId = "";
+    private List<AgentProfileItem> AgentProfiles = new();
+    private string? SessionId;
+
+    private class AgentProfileItem { public string Id { get; set; } = ""; public string Name { get; set; } = ""; public string? Description { get; set; } }
+    private class AiResponse { public string Content { get; set; } = ""; }
+
+    private class AiChatRequest
+    {
+        public string Prompt { get; set; } = "";
+        public string Provider { get; set; } = "OpenRouter";
+        public string Model { get; set; } = "mistralai/mistral-small-3.2-24b-instruct:free";
+        public bool UseFunctionCalling { get; set; } = false;
+        public string? AgentId { get; set; }
+    }
+
+    public class ChatMessage
+    {
+        public string Role { get; set; } = "assistant";
+        public string Content { get; set; } = "";
+        public DateTime When { get; set; } = DateTime.UtcNow;
+        public ChatMessage() { }
+        public ChatMessage(string role, string content) { Role = role; Content = content; When = DateTime.UtcNow; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("AiApi");
+            AgentProfiles = await client.GetFromJsonAsync<List<AgentProfileItem>>("api/agent/profiles") ?? new();
+            SelectedAgentId = AgentProfiles.FirstOrDefault()?.Id ?? "";
+            SessionId = await JS.InvokeAsync<string>("ctai.ensureSessionId");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Init Error] {ex.Message}");
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(UserMessage)) return;
+
+        Messages.Add(new ChatMessage("user", UserMessage));
+        StateHasChanged(); await ScrollToBottomAsync();
+        IsThinking = true; StateHasChanged();
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("AiApi");
+
+            var body = new AiChatRequest
+            {
+                Prompt = UserMessage,
+                AgentId = SelectedAgentId,
+                Provider = "OpenRouter",
+                UseFunctionCalling = false
+            };
+
+            var res = await client.PostAsJsonAsync("api/ai/chat", body);
+            res.EnsureSuccessStatusCode();
+
+            var content = await res.Content.ReadFromJsonAsync<AiResponse>();
+            if (content is not null) Messages.Add(new ChatMessage("assistant", content.Content));
+        }
+        catch (Exception ex)
+        {
+            Messages.Add(new ChatMessage("assistant", $"(Error: {ex.Message})"));
+        }
+        finally
+        {
+            IsThinking = false;
+        }
+
+        UserMessage = "";
+        StateHasChanged(); await ScrollToBottomAsync();
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        await Task.Delay(40);
+        await JS.InvokeVoidAsync("blazorHelpers.scrollToBottom", chatWindowRef);
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(UserMessage))
+            await SendMessage();
+    }
+
+    public void Dispose() { UserMessage = ""; Messages.Clear(); }
+}

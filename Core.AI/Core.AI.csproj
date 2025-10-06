@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<PackageId>CoreTemplate.AI</PackageId>
+		<Version>1.4.0</Version>
+		<Authors>Ceren Susuz</Authors>
+		<Company>Ceren Susuz</Company>
+		<Product>CoreTemplate.AI</Product>
+
+		<Description>
+			A modular and strategy-based AI abstraction layer for .NET applications.
+			Includes built-in support for OpenRouter and Ollama, dynamic model/provider switching, function calling,
+			Semantic Kernel integration, agent profiles, and real-time streaming capabilities.
+		</Description>
+
+		<PackageTags>AI;OpenRouter;Ollama;ChatGPT;SemanticKernel;FunctionCalling;Streaming;CleanArchitecture</PackageTags>
+		<RepositoryUrl>https://github.com/CerenSusuz/CoreTemplateApp</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/CerenSusuz/CoreTemplateApp</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FluentValidation" Version="12.0.0" />
+		<PackageReference Include="MediatR" Version="13.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
+		<PackageReference Include="Microsoft.SemanticKernel" Version="1.60.0" />
+		<PackageReference Include="Panlingo.LanguageIdentification.CLD2" Version="0.6.0" />
+		<PackageReference Include="Panlingo.LanguageIdentification.CLD2.Native" Version="0.6.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
+		<PackageReference Include="Scrutor" Version="6.1.0" />
+	</ItemGroup>
+
+</Project>

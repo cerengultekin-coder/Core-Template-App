@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoreTemplate.AI.UI</title>
+    <base href="/" />
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect rx='14' width='64' height='64' fill='url(%23g)'/%3E%3Cpath d='M20 26h24v12H20z' fill='white' opacity='.85'/%3E%3C/svg%3E" />
+    <link href="CoreTemplate.AI.UI.styles.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">
+        <svg class="loading-progress"><circle r="40%" cx="50%" cy="50%"></circle><circle r="40%" cx="50%" cy="50%"></circle></svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">An unhandled error has occurred. <a href="." class="reload">Reload</a> <span class="dismiss">🗙</span></div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+
+    <script>
+        window.blazorHelpers = {
+            scrollToBottom: (el) => { if (el) el.scrollTop = el.scrollHeight; }
+        };
+        window.sess = {
+            set: (k, v) => sessionStorage.setItem(k, v ?? ""),
+            get: (k) => sessionStorage.getItem(k),
+            remove: (k) => sessionStorage.removeItem(k)
+        };
+
+        window.ctai = {
+            ensureSessionId: () => {
+                const k = 'ctai_session_id';
+                let id = sessionStorage.getItem(k);
+                if (!id) { id = crypto.randomUUID(); sessionStorage.setItem(k, id); }
+                return id;
+            }
+        };
+    </script>
+</body>
+</html>

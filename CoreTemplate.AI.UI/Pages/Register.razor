@@ -1,0 +1,88 @@
+﻿@page "/auth/register"
+@attribute [Layout(typeof(MainLayout))]
+
+@inject AuthApi Api
+@inject NavigationManager Nav
+
+<div class="auth-hero">
+    <div class="auth-card card">
+        <div class="auth-header">
+            <svg viewBox="0 0 640 180" class="auth-svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="g-auth-r" x1="0" x2="1">
+                        <stop stop-color="#6366f1" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#g-auth-r)"
+                      d="M0,140 C120,60 240,200 340,120 C420,66 520,100 640,60 L640,0 L0,0 Z" />
+            </svg>
+
+            <h1 class="auth-title">Create account</h1>
+            <p class="auth-sub">Join and explore OpenRouter, Ollama, Function Calling & more.</p>
+        </div>
+
+        <EditForm Model="@m" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-row">
+                <label>Username</label>
+                <InputText class="form-input" @bind-Value="m.Username" autocomplete="username" />
+            </div>
+
+            <div class="form-row">
+                <label>Email</label>
+                <InputText class="form-input" @bind-Value="m.Email" autocomplete="email" />
+            </div>
+
+            <div class="form-row">
+                <label>Password</label>
+                <InputText class="form-input" @bind-Value="m.Password" type="password" autocomplete="new-password" />
+            </div>
+
+            <button class="btn btn-primary auth-btn" disabled="@isSubmitting">
+                @(isSubmitting ? "Creating…" : "Create account")
+            </button>
+        </EditForm>
+
+        <div class="auth-foot">
+            <span>Already have an account?</span>
+            <NavLink href="/auth/login">Login</NavLink>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isSubmitting;
+    private M m = new();
+
+    class M
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task Submit()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        try
+        {
+            var req = new RegisterRequest(m.Username, m.Email, m.Password);
+            await Api.RegisterAsync(req);
+
+            Nav.NavigateTo("/auth/login?returnUrl=/chat", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

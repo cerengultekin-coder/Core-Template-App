@@ -1,0 +1,86 @@
+﻿@page "/auth/login"
+@attribute [Layout(typeof(MainLayout))]
+
+@inject AuthApi Api
+@inject NavigationManager Nav
+
+<div class="auth-hero">
+    <div class="auth-card card">
+        <div class="auth-header">
+            <!-- AI-ish header blob -->
+            <svg viewBox="0 0 640 180" class="auth-svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="g-auth" x1="0" x2="1">
+                        <stop stop-color="#6366f1" />
+                        <stop offset="1" stop-color="#a855f7" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#g-auth)"
+                      d="M0,120 C120,190 220,40 340,90 C420,122 520,70 640,120 L640,0 L0,0 Z" />
+            </svg>
+
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-sub">Sign in to start chatting with the assistant.</p>
+        </div>
+
+        <EditForm Model="@m" OnValidSubmit="Submit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-row">
+                <label>Email</label>
+                <InputText class="form-input" @bind-Value="m.Email" autocomplete="email" />
+            </div>
+
+            <div class="form-row">
+                <label>Password</label>
+                <InputText class="form-input" @bind-Value="m.Password" type="password" autocomplete="current-password" />
+            </div>
+
+            <button class="btn btn-primary auth-btn" disabled="@isSubmitting">
+                @(isSubmitting ? "Signing in…" : "Login")
+            </button>
+        </EditForm>
+
+        <div class="auth-foot">
+            <span>Don’t have an account?</span>
+            <NavLink href="/auth/register">Create one</NavLink>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? ReturnUrl { get; set; }
+
+    private bool isSubmitting;
+    private M m = new();
+
+    class M
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task Submit()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+
+        try
+        {
+            var req = new LoginRequest(m.Email, m.Password);
+            await Api.LoginAsync(req);
+
+            var target = string.IsNullOrWhiteSpace(ReturnUrl) ? "/chat" : ReturnUrl!;
+            Nav.NavigateTo(target, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

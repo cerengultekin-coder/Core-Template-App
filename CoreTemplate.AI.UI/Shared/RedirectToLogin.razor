@@ -1,0 +1,6 @@
+﻿@inject NavigationManager Nav
+@code {
+    [Parameter] public string? ReturnUrl { get; set; }
+    protected override void OnInitialized()
+        => Nav.NavigateTo($"/auth/login?returnUrl={Uri.EscapeDataString(ReturnUrl ?? Nav.Uri)}", true);
+}
